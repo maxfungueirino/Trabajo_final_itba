@@ -19,7 +19,7 @@ menuprincipal = int(input("TRABAJO FINAL PYTHON\n\nIngrese el numero de opcion d
 while menuprincipal !=0:
     
     # Conexion con la base de datos
-    os.chdir(r"C:\Users\jmaxi\Trabajo final python\Trabajo_final_itba\Trabajo_final_itba")
+    # os.chdir(r"C:\Users\jmaxi\Trabajo final python\Trabajo_final_itba\Trabajo_final_itba")
     db_conn = sqlite3.connect("database/stocks")
     
     #Actualizacion de datos
