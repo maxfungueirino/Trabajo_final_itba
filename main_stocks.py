@@ -19,7 +19,7 @@ menuprincipal = int(input("TRABAJO FINAL PYTHON\n\nIngrese el numero de opcion d
 while menuprincipal !=0:
     
     # Conexion con la base de datos
-    # os.chdir(r"C:\Users\jmaxi\Trabajo final python\Trabajo_final_itba\Trabajo_final_itba")
+    os.chdir(r"C:\Users\jmaxi\Trabajo final python\Trabajo_final_itba\Trabajo_final_itba")
     db_conn = sqlite3.connect("database/stocks")
     
     #Actualizacion de datos
@@ -61,36 +61,39 @@ while menuprincipal !=0:
             
 
             #Request a la api
-        
-            data = api_request(ticker, fecha_desde, fecha_hasta)
+            try:
+                data = api_request(ticker, fecha_desde, fecha_hasta)
 
-            dict = json.loads(data)
-            df2 = pd.DataFrame.from_dict(dict, orient="index")
+                dict = json.loads(data)
+                df2 = pd.DataFrame.from_dict(dict, orient="index")
 
-            list_items = []
+                list_items = []
 
-            #Parseo de json
-            for item in dict['results']:
-                a = item
-                list_items.append(a)
+                #Parseo de json
+                for item in dict['results']:
+                    a = item
+                    list_items.append(a)
+                    
+                df_results = pd.DataFrame(list_items)
+                df_results.reset_index(inplace=True,drop=True)
+
+                #Preparado de los datos para guardar en la base
+                df_stock = data_wrangling(df_results, ticker)
+
+
+                #Guardado en la base, con validacion de datos duplicados
+                df_stock.to_sql(name='tbl_stocks', con=db_conn, if_exists='append',index=False)
                 
-            df_results = pd.DataFrame(list_items)
-            df_results.reset_index(inplace=True,drop=True)
-
-            #Preparado de los datos para guardar en la base
-            df_stock = data_wrangling(df_results, ticker)
-
-
-            #Guardado en la base, con validacion de datos duplicados
-            df_stock.to_sql(name='tbl_stocks', con=db_conn, if_exists='append',index=False)
-            
-            df_no_duplicates = pd.read_sql_query("select distinct * from tbl_stocks", db_conn)
-            
-            df_no_duplicates.to_sql(name='tbl_stocks', con=db_conn, if_exists='replace',index=False)
-            
-            print("Datos actualizados, muchas gracias. \n")
-            
-            cursor.close()
+                df_no_duplicates = pd.read_sql_query("select distinct * from tbl_stocks", db_conn)
+                
+                df_no_duplicates.to_sql(name='tbl_stocks', con=db_conn, if_exists='replace',index=False)
+                
+                print("Datos actualizados, muchas gracias. \n")
+                cursor.close()
+                
+            except:
+                
+                print("Error en conexion, verifique si la informacion ingresada es correcta y vuelva a intentar \n")
             
         except ValueError as err:
             print(err.args)
@@ -138,11 +141,10 @@ while menuprincipal !=0:
             graficar(df_plot,ticker_plot)
         else:
             print("Opcion invalida, vuelva a ingresar la opcion deseada.")
-                     
-    elif menuprincipal==0:
-        print('Muchas gracias, vuelva prontos!')
-
+                      
     else:
         print("Opcion invalida, vuelva a ingresar la opcion deseada.")
         
-    menuprincipal = int(input("Ingrese el numero de opcion deseada: \n 1 - Actualizacion de datos \n 2 - Visualizacion de datos \n 3 - Graficos en tiempo real \n 0 - Salir \n" ))
+    menuprincipal = int(input("Ingrese el numero de opcion deseada: \n 1 - Actualizacion de datos \n 2 - Visualizacion de datos \n 0 - Salir \n" ))
+
+print('Muchas gracias, vuelva prontos!')

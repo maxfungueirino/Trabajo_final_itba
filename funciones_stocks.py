@@ -46,12 +46,14 @@ def api_request (ticker, fecha_desde, fecha_hasta):
     headers_auth= {"Authorization" : "Bearer {token}".format(token=access_token)}
     try:
         response = requests.get(url, headers=headers_auth)
-
-        print(response.status_code)
+        response_stat = response.status_code
+        if response_stat == 400:
+            raise Exception('Error en conexion, verifique la informacion y vuelva a intentar')
+        
         data = response.content
         return(data)
     except:
-        print("Error de conexion, vuelva a intentar.")
+        print(Exception)
         
 # Funcion para request a la api de stocks, parametros para tiempo real
 def api_request_plot (ticker, fecha_desde, fecha_hasta):
